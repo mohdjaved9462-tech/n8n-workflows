@@ -1,0 +1,320 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1552,
+        16
+      ],
+      "id": "ebd23025-c393-4bac-ba75-69cb97189a45",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "labelIds": [
+            "UNREAD"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1296,
+        16
+      ],
+      "id": "af31a527-3ddf-4d29-9e7e-9b6f3543650b",
+      "name": "Gmail All Mails",
+      "webhookId": "14e2190a-7089-4f72-8ef6-8ac019e0403f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2nzdAwHJo9ibjgrq",
+          "name": "Gmail Mr Salmani"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.threadId }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1024,
+        16
+      ],
+      "id": "7b57e0d2-2f5a-4d82-8981-e0bf93872d02",
+      "name": "Gmail All Details",
+      "webhookId": "49230dc7-c71b-4ad0-8983-2cdc2d1fd0ed",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2nzdAwHJo9ibjgrq",
+          "name": "Gmail Mr Salmani"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=I want you to draft an email reply in a very professional way.\nSome things to know I am might not open for promotions or collaborations but I am open for meetings and project discussion as well.\n\nI want you to reply on this email:{{ $json.text }}\n\nI want you to draft the reply and give me only the body I don't want you to give me any subject line or anything just give me the body text.\nMy name is Mohd Javed.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -784,
+        16
+      ],
+      "id": "41a0ee4a-ce3b-4892-9da9-f51773c1c885",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1M0fx02gKs_mPwut8NlhPJRWGh_enu__b1I4HjaH8TuA",
+          "mode": "list",
+          "cachedResultName": "Gmail sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1M0fx02gKs_mPwut8NlhPJRWGh_enu__b1I4HjaH8TuA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1M0fx02gKs_mPwut8NlhPJRWGh_enu__b1I4HjaH8TuA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Sender Name",
+              "displayName": "Sender Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "From Email",
+              "displayName": "From Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Body",
+              "displayName": "Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Body Draft Reply",
+              "displayName": "Body Draft Reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Threade ID",
+              "displayName": "Threade ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -400,
+        16
+      ],
+      "id": "98bc21f4-ee91-4dde-823c-7468fdbfb006",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MIaqKHODYoc7hVP9",
+          "name": "Mr Salmani"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $json['Threade ID'] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -112,
+        16
+      ],
+      "id": "146943a7-14bb-492c-8db3-149c5d67b3c1",
+      "name": "Mark a message as read",
+      "webhookId": "42531708-a8b7-4312-953a-89530431df15",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2nzdAwHJo9ibjgrq",
+          "name": "Gmail Mr Salmani"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $json.threadId }}",
+        "message": "={{ $('Append row in sheet').item.json['Body Draft Reply'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        16
+      ],
+      "id": "bb3f1bc6-74d6-496e-9ca7-c973da1deca9",
+      "name": "Reply to a message",
+      "webhookId": "3b782203-73a0-41c8-8fb4-ad222bf1f613",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2nzdAwHJo9ibjgrq",
+          "name": "Gmail Mr Salmani"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "think": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        336
+      ],
+      "id": "868c40ab-5818-46d7-bcb0-13e2f6fd4c9b",
+      "name": "Ollama Chat Model",
+      "credentials": {}
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail All Mails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail All Mails": {
+      "main": [
+        [
+          {
+            "node": "Gmail All Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail All Details": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Mark a message as read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark a message as read": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fc8ea56a9f77461efdbaf4ab14000fda259d6eb0a0ad047cd98c8f84ded3bdb0"
+  }
+}
