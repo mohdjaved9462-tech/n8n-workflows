@@ -1,0 +1,140 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                6
+              ],
+              "triggerAtHour": 18,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        -192
+      ],
+      "id": "ca6bc811-0c4e-419c-aa40-db50b0a8c4c9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1bWtRiUMkRAiJlaQB6K5OT8bFq3LmpJFje12-iCe7UDQ",
+          "mode": "list",
+          "cachedResultName": "DEV_SCRUM_2026",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bWtRiUMkRAiJlaQB6K5OT8bFq3LmpJFje12-iCe7UDQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 303469368,
+          "mode": "list",
+          "cachedResultName": "Project Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bWtRiUMkRAiJlaQB6K5OT8bFq3LmpJFje12-iCe7UDQ/edit#gid=303469368"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        -192
+      ],
+      "id": "b341d7ed-4e53-4bdd-8120-c99b0b81d344",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T7iyQUm3fh7LiOMO",
+          "name": "Dev19 Google sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n/* -------------------------\n   DETAIL ROWS\n--------------------------*/\n\nconst detailRows = items.filter(item => {\n\n    const r = item.json;\n\n    return (\n        r.row_number >= 6 &&\n        r.row_number <= 47 &&\n        r.col_3 &&\n        r.col_4 &&\n        r.col_5\n    );\n\n});\n\n/* -------------------------\n   SUMMARY ROWS\n--------------------------*/\n\nconst summaryRows = items.filter(item => {\n    const r = item.json;\n\n    return (\n        r.row_number >= 55 &&\n        r.row_number <= 58 &&\n        r.col_2\n    );\n});\n\nlet detailHTML = \"\";\n\nfor (const item of detailRows){\n\n    const r = item.json;\n\n    let statusColor=\"#666\";\n\n    switch((r.col_5||\"\").trim()){\n\n        case \"Done\":\n            statusColor=\"#16a34a\";\n            break;\n\n        case \"In Progress\":\n            statusColor=\"#f59e0b\";\n            break;\n\n        case \"Blocked\":\n            statusColor=\"#dc2626\";\n            break;\n\n        case \"In Review\":\n            statusColor=\"#7c3aed\";\n            break;\n\n        case \"On Hold\":\n            statusColor=\"#ea580c\";\n            break;\n\n        case \"Not Started\":\n            statusColor=\"#6b7280\";\n            break;\n    }\n  let currentProject = \"\";\n\n  for (const item of detailRows) {\n\n      const r = item.json;\n  \n        if (r.col_2 && r.col_2.trim() !== \"\") {\n            currentProject = r.col_2;\n        }\n  \n      const project = currentProject;\n  \n      // project variable ko table me use karo\n  }\n\n  \n    detailHTML+=`\n<tr>\n<td>${r.col_2||\"\"}</td>\n<td>${r.col_3||\"\"}</td>\n<td>${r.col_4||\"\"}</td>\n<td style=\"color:${statusColor};font-weight:bold\">${r.col_5||\"\"}</td>\n<td align=\"center\">${r.col_6||\"\"}</td>\n<td>${r.col_7||\"\"}</td>\n<td>${r.col_8||\"\"}</td>\n<td>${r.col_9||\"\"}</td>\n<td>${r.col_10||\"\"}</td>\n</tr>`;\n}\n\n/* -------------------------\nSUMMARY\n--------------------------*/\n\nlet summaryHTML=\"\";\n\nlet totalModules=0;\nlet done=0;\nlet progress=0;\nlet blocked=0;\nlet notStarted=0;\n\nfor(const item of summaryRows){\n\n    const r=item.json;\n\n    totalModules+=Number(r.col_3||0);\n    done+=Number(r.col_4||0);\n    progress+=Number(r.col_5||0);\n    blocked+=Number(r.col_6||0);\n    notStarted+=Number(r.col_7||0);\n\n    summaryHTML+=`\n<tr>\n\n<td>${r.col_2}</td>\n\n<td align=\"center\">${r.col_3}</td>\n\n<td align=\"center\">${r.col_4}</td>\n\n<td align=\"center\">${r.col_5}</td>\n\n<td align=\"center\">${r.col_6}</td>\n\n<td align=\"center\">${r.col_7}</td>\n\n<td align=\"center\">${(Number(r.col_8)*100).toFixed(0)}%</td>\n\n</tr>`;\n}\n\nconst html=`\n\n<div style=\"font-family:Arial\">\n\n<h2 style=\"color:#0F4C81\">\n\nPROJECT TRACKER — Complete Module & Ownership Status\n\n</h2>\n\n<p>\n\n<b>Report Date :</b>\n\n${new Date().toDateString()}\n\n</p>\n\n<h3>Module Details</h3>\n\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\"\nstyle=\"border-collapse:collapse;width:100%\">\n\n<tr style=\"background:#0F4C81;color:white\">\n\n<th>Project</th>\n\n<th>Module</th>\n\n<th>Owner</th>\n\n<th>Status</th>\n\n<th>%</th>\n\n<th>Priority</th>\n\n<th>Start</th>\n\n<th>Due</th>\n\n<th>Notes</th>\n\n</tr>\n\n${detailHTML}\n\n</table>\n\n<br><br>\n\n<h3>Project Summary</h3>\n\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\"\nstyle=\"border-collapse:collapse;width:100%\">\n\n<tr style=\"background:#0F4C81;color:white\">\n\n<th>Project</th>\n\n<th>Total</th>\n\n<th>Done</th>\n\n<th>Progress</th>\n\n<th>Blocked</th>\n\n<th>Not Started</th>\n\n<th>Completion</th>\n\n</tr>\n\n${summaryHTML}\n\n</table>\n\n<br>\n\n<h3>Overall</h3>\n\n<table border=\"1\" cellpadding=\"6\">\n\n<tr><td>Total Modules</td><td>${totalModules}</td></tr>\n\n<tr><td>Done</td><td>${done}</td></tr>\n\n<tr><td>In Progress</td><td>${progress}</td></tr>\n\n<tr><td>Blocked</td><td>${blocked}</td></tr>\n\n<tr><td>Not Started</td><td>${notStarted}</td></tr>\n\n</table>\n\n<br>\n\nRegards,<br>\n\n<b>Project Automation System</b>\n\n</div>\n\n`;\n\nreturn [{\njson:{\nhtml\n}\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -192
+      ],
+      "id": "8f5433f1-bebd-4dd1-871c-c98afd67c6e2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "des1@invadertech.com, dev1@invadertech.com, dev3@invadertech.com, dev4@invadertech.com, dev5@invadertech.com, dev7@invadertech.com, dev10@invadertech.com, dev11@invadertech.com, dev12@invadertech.com, dev18@invadertech.com, dev19@invadertech.com, dev20@invadertech.com",
+        "subject": "=Weekly Project Report - {{$now.toFormat('dd LLL yyyy')}}",
+        "message": "={{$json.html}}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        -192
+      ],
+      "id": "7b6168ef-824a-4484-8ef4-0420ee67b55a",
+      "name": "Send a message",
+      "webhookId": "199370bc-1426-4bae-b148-ef78f10132fd",
+      "notesInFlow": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2nzdAwHJo9ibjgrq",
+          "name": "Gmail Mr Salmani"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fc8ea56a9f77461efdbaf4ab14000fda259d6eb0a0ad047cd98c8f84ded3bdb0"
+  }
+}
